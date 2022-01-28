@@ -1,0 +1,162 @@
+{
+  "name": "NETCONF",
+  "type": "executer",
+  "execProgram": "node",
+  "main": "app.js",
+  "version": "1.0.0",
+  "description": "Integration with NETCONF protocol",
+  "imgUrl": "thumbnail.png",  
+  "category": "NETWORK",
+  "methods": [
+    {
+      "name": "getConfig",
+      "viewName": "Get configuration",
+      "params": [
+        {
+          "name": "hostname",
+          "viewName": "Hostname",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "port",
+          "viewName": "Port",
+          "type": "string"
+        },
+        {
+          "name": "user",
+          "viewName": "Username",
+          "type": "string"
+        },
+        {
+          "name": "password",
+          "viewName": "Password",
+          "type": "vault"
+        },
+        {
+          "name": "backup",
+          "viewName": "Create backup",
+          "type": "boolean"
+        },
+        {
+          "name": "content",
+          "viewName": "XML configuration defined by the device's YANG data models",
+          "type": "text"
+        },
+        {
+          "name": "datastoreSrc",
+          "viewName": "Source datastore",
+          "type": "options",
+          "options": [
+            {
+              "id": "candidate",
+              "name": "Candidate"
+            },
+            {
+              "id": "running",
+              "name": "Running"
+            },
+            {
+              "id": "startup",
+              "name": "startup"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "editConfig",
+      "viewName": "Edit configuration",
+      "params": [
+        {
+          "name": "hostname",
+          "viewName": "Hostname",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "port",
+          "viewName": "Port",
+          "type": "string"
+        },
+        {
+          "name": "user",
+          "viewName": "Username",
+          "type": "string"
+        },
+        {
+          "name": "password",
+          "viewName": "Password",
+          "type": "vault"
+        },
+        {
+          "name": "backup",
+          "viewName": "Create backup",
+          "type": "boolean"
+        },
+        {
+          "name": "content",
+          "viewName": "XML configuration defined by the device's YANG data models",
+          "type": "text"
+        },
+        {
+          "name": "datastoreSrc",
+          "viewName": "Source datastore",
+          "type": "options",
+          "options": [
+            {
+              "id": "candidate",
+              "name": "Candidate"
+            },
+            {
+              "id": "running",
+              "name": "Running"
+            },
+            {
+              "id": "startup",
+              "name": "Startup"
+            }
+          ]
+        },
+        {
+          "name": "targetSrc",
+          "viewName": "Target datasource",
+          "type": "options",
+          "options": [
+            {
+              "id": "candidate",
+              "name": "Candidate"
+            },
+            {
+              "id": "running",
+              "name": "Running"
+            },
+            {
+              "id": "startup",
+              "name": "Startup"
+            }
+          ]
+        },
+        {
+          "name": "operation",
+          "viewName": "Operation",
+          "type": "options",
+          "options": [
+            {
+              "id": "merge",
+              "name": "Merge"
+            },
+            {
+              "id": "replace",
+              "name": "Replace"
+            },
+            {
+              "id": "none",
+              "name": "None"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
