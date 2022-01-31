@@ -13,7 +13,7 @@
       "viewName": "Get configuration",
       "params": [
         {
-          "name": "hostname",
+          "name": "host",
           "viewName": "Hostname",
           "type": "string",
           "required": true
@@ -24,7 +24,7 @@
           "type": "string"
         },
         {
-          "name": "user",
+          "name": "username",
           "viewName": "Username",
           "type": "string"
         },
@@ -34,19 +34,10 @@
           "type": "vault"
         },
         {
-          "name": "backup",
-          "viewName": "Create backup",
-          "type": "boolean"
-        },
-        {
-          "name": "content",
-          "viewName": "XML configuration defined by the device's YANG data models",
-          "type": "text"
-        },
-        {
           "name": "datastoreSrc",
           "viewName": "Source datastore",
           "type": "options",
+          "required": true,
           "options": [
             {
               "id": "candidate",
@@ -58,9 +49,19 @@
             },
             {
               "id": "startup",
-              "name": "startup"
+              "name": "Startup"
             }
           ]
+        },
+        {
+          "name": "content",
+          "viewName": "XML configuration defined by the device's YANG data models",
+          "type": "text"
+        },
+        {
+          "name": "backup",
+          "viewName": "Create backup",
+          "type": "boolean"
         }
       ]
     },
@@ -69,7 +70,7 @@
       "viewName": "Edit configuration",
       "params": [
         {
-          "name": "hostname",
+          "name": "host",
           "viewName": "Hostname",
           "type": "string",
           "required": true
@@ -80,7 +81,7 @@
           "type": "string"
         },
         {
-          "name": "user",
+          "name": "username",
           "viewName": "Username",
           "type": "string"
         },
@@ -96,7 +97,7 @@
         },
         {
           "name": "content",
-          "viewName": "XML configuration defined by the device's YANG data models",
+          "viewName": "Content",
           "type": "text"
         },
         {
