@@ -3,7 +3,7 @@
   "type": "executer",
   "execProgram": "node",
   "main": "app.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Integration with NETCONF protocol",
   "imgUrl": "thumbnail.png",  
   "category": "NETWORK",
@@ -113,27 +113,6 @@
           "viewName": "SSH Key",
           "description": "SSH Key for SSH authentication. You can use the SSH Key or a password, if both are provided the SSH Key is prioritized.",
           "type": "vault"
-        },
-        {
-          "name": "sourceDatastore",
-          "viewName": "Source datastore",
-          "description": "Source datastore to get the configuration from.",
-          "type": "options",
-          "required": true,
-          "options": [
-            {
-              "id": "candidate",
-              "name": "Candidate"
-            },
-            {
-              "id": "running",
-              "name": "Running"
-            },
-            {
-              "id": "startup",
-              "name": "Startup"
-            }
-          ]
         },
         {
           "name": "xmlPath",
