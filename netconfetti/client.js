@@ -5,8 +5,6 @@ const uuid = require("uuid");
 const xml2js = require("xml2js");
 const framing = require("./deliminators");
 const messages = require("./messages");
-const notification_1 = require("./notification");
-const reply_1 = require("./reply");
 const rpcErrors_1 = require("./rpcErrors");
 
 class Client extends events.EventEmitter {
@@ -14,6 +12,7 @@ class Client extends events.EventEmitter {
     super();
     this.sshClient = new ssh2.Client();
     this.receiveBuffer = "";
+    this.sshFrames = [];
     this.idGenerator = options.idGenerator || (() => uuid.v1());
     this.timeout = options.timeout || 1000 * 60;
     this.capabilities = options.capabilities || [];
@@ -94,15 +93,12 @@ class Client extends events.EventEmitter {
         reject(new Error("Timeout waiting for response"));
       }, this.timeout);
       msgRecv = (reply) => {
+        if (reply.sshFrames) return resolve({ rawXML: "", parsedObject: {}, sshFrames: reply.sshFrames })
         const receivedMessageId = reply.parsedObject.$["message-id"];
         if (receivedMessageId !== messageId) { return; }
         this.removeListener("reply", msgRecv);
         clearTimeout(timeoutId);
-        if (reply.parsedObject.errors?.length > 0) {
-          reject(new rpcErrors_1.default(reply.errors));
-        } else {
-          resolve(reply);
-        }
+        resolve(reply);
       };
       this.on("reply", msgRecv);
       this.activeChannel.write(msg);
@@ -114,16 +110,27 @@ class Client extends events.EventEmitter {
   }
 
   async processData(buffer) {
-    const s = String(buffer.toString().trim().replace(/^#[0-9]+$/gm, "").trim());
-    if (s == "") { return; }
-    this.receiveBuffer += s;
+    const frame = buffer.toString();
+    this.sshFrames.push(frame);
 
-    const endingTag = "</rpc-reply>";
-    if (!s.includes(endingTag)) { return; }
-    this.receiveBuffer = this.receiveBuffer.trim().substring(0, this.receiveBuffer.indexOf(endingTag) + endingTag.length);
+    if (!framing.endFrame.test(frame)) {
+      this.receiveBuffer += frame.replace(framing.beginFrame, "");
+      return;
+    }
+    else {
+      this.receiveBuffer += frame.replace(framing.beginFrame, "").match(framing.endFrame)[0];
+    }
 
-    const data = await this.parser.parseStringPromise(this.receiveBuffer);
-    this.emit("reply", { rawXML: this.receiveBuffer, parsedObject: data["rpc-reply"] });
+    try {
+      const data = await this.parser.parseStringPromise(this.receiveBuffer);
+      this.emit("reply", { rawXML: this.receiveBuffer, parsedObject: data["rpc-reply"] });
+      this.receiveBuffer = ""
+      this.sshFrames = []
+    } catch {
+      this.emit("reply", { sshFrames: this.sshFrames });
+      this.receiveBuffer = ""
+      this.sshFrames = []
+    }
   }
 }
 exports.default = Client;
