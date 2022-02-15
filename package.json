@@ -1,13 +1,14 @@
 {
-  "name": "src",
+  "name": "kaholo-plugin-netconf",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "license": "MIT",
   "scripts": {
     "lint": "npx eslint .",
     "lint:fix": "npx eslint --fix ."
   },
   "dependencies": {
+    "escape-html": "^1.0.3",
     "ssh2": "^1.6.0",
     "uuid": "^8.3.2",
     "xml2js": "^0.4.23"
