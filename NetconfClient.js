@@ -3,7 +3,6 @@ const netconfetti = require("./netconfetti");
 class NetconfClient {
   constructor() {
     this.netconfetti = new netconfetti.Client();
-    this.connected = false;
   }
 
   connect(auth) {
