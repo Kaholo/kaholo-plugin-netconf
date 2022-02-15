@@ -17,6 +17,19 @@ function prettifyXml(xml, tabChar = "  ") {
 }
 
 /**
+ * Checks if path exists
+ * @param {string} path
+ */
+async function pathExists(path) {
+  try {
+    await fs.access(path);
+  } catch {
+    return false;
+  }
+  return true;
+}
+
+/**
  * Maps the params to the authentication object
  * @param {{
  *  host: string,
@@ -53,6 +66,9 @@ function mapAuthOptions(params) {
  * @returns {Object}
  */
 async function loadXmlFromFile(path) {
+  if (!await pathExists(path)) {
+    throw new Error(`Path ${path} does not exist.`);
+  }
   const fileContent = await fs.readFile(path);
   return xml2js.parseStringPromise(fileContent);
 }
