@@ -1,8 +1,14 @@
 const netconfetti = require("./netconfetti");
+const {
+  ncNS, changeNamespace, yangNS, withDefaultsNS,
+} = require("./netconfetti/messages");
 
 class NetconfClient {
   constructor() {
     this.netconfetti = new netconfetti.Client();
+    this.netconfNamespace = ncNS;
+    this.yangNamespace = yangNS;
+    this.withDefaulstNamespace = withDefaultsNS;
   }
 
   connect(auth) {
@@ -11,6 +17,21 @@ class NetconfClient {
 
   close() {
     return this.netconfetti.sshClient.end();
+  }
+
+  changeNetconfNamespace(namespace) {
+    this.netconfNamespace = namespace;
+    changeNamespace("netconf", namespace);
+  }
+
+  changeYangNamespace(namespace) {
+    this.yangNamespace = namespace;
+    changeNamespace("yang", namespace);
+  }
+
+  changeWithDefaultsNamespace(namespace) {
+    this.withDefaultsNamespace = namespace;
+    changeNamespace("withDefaults", namespace);
   }
 
   getConfig(datastore) {
@@ -23,14 +44,17 @@ class NetconfClient {
     });
   }
 
-  editConfig({ config, operation }) {
+  editConfig({ config, operation, datastore }) {
+    if (!config.config) {
+      throw new Error("Invalid XML format. The root tag must be \"config\".");
+    }
     return this.netconfetti.rpc({
       "edit-config": {
         target: {
-          candidate: {},
+          [datastore]: {},
         },
         "default-operation": operation,
-        config,
+        ...config,
       },
     });
   }

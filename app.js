@@ -1,4 +1,4 @@
-const escapeHtml = require("escape-html");
+const escapeHTML = require("escape-html");
 const fs = require("fs/promises");
 const {
   prettifyXml, mapAuthOptions, loadXmlFromFile, checkReply,
@@ -21,11 +21,13 @@ async function getConfig({ params }) {
 
   netconfClient.close();
 
+  const prettyXML = prettifyXml(getReply.rawXML);
+
   if (filepath) {
-    await fs.writeFile(filepath, prettifyXml(getReply.rawXML));
+    await fs.writeFile(filepath, prettyXML);
   }
 
-  return getReply.sshFrames || escapeHtml(getReply.rawXML);
+  return getReply.sshFrames || escapeHTML(prettyXML);
 }
 
 async function editConfig({ params }) {
@@ -33,35 +35,38 @@ async function editConfig({ params }) {
     operation, outPath, xmlPath,
   } = params;
 
+  const datastore = params.targetDatastore ?? "candidate";
+
   const authOptions = mapAuthOptions(params);
 
-  const config = loadXmlFromFile(xmlPath);
+  const config = await loadXmlFromFile(xmlPath);
 
   const netconfClient = new NetconfClient();
 
   await netconfClient.connect(authOptions);
 
-  await netconfClient.lockDatastore("running");
-
-  await netconfClient.deleteConfig("candidate");
+  await netconfClient.lockDatastore(datastore);
 
   const editReply = await netconfClient.editConfig({
     config,
     operation,
+    datastore,
   });
   checkReply(editReply);
 
   await netconfClient.commit();
 
-  await netconfClient.unlockDatastore("running");
+  await netconfClient.unlockDatastore(datastore);
 
   netconfClient.close();
 
+  const prettyXML = prettifyXml(editReply.rawXML);
+
   if (outPath) {
-    await fs.writeFile(outPath, prettifyXml(editReply.rawXML));
+    await fs.writeFile(outPath, prettyXML);
   }
 
-  return editReply.sshFrames || escapeHtml(editReply.rawXML);
+  return editReply.sshFrames || escapeHTML(prettyXML);
 }
 
 module.exports = {

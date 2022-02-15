@@ -1,5 +1,7 @@
+const escapeHTML = require("escape-html");
 const fs = require("fs/promises");
 const xml2js = require("xml2js");
+const { RPCError, RPCErrors } = require("./netconfetti");
 
 const DEFAULT_PORT = 830;
 
@@ -73,13 +75,6 @@ async function loadXmlFromFile(path) {
   return xml2js.parseStringPromise(fileContent);
 }
 
-class NetconfError extends Error {
-  constructor(errors) {
-    super("NETCONF Reply contains errors");
-    this.errors = errors;
-  }
-}
-
 /**
  * Checks if the NETCONF reply does not contain any errors etc.
  * @param {{
@@ -98,15 +93,10 @@ function checkReply(reply, options = {}) {
   const errorsToIgnore = options.ignore || [];
   if (reply.parsedObject["rpc-error"]) {
     const errors = reply.parsedObject["rpc-error"]
-      .map((error) => ({
-        type: error["error-type"][0],
-        tag: error["error-tag"][0],
-        severity: error["error-severity"][0],
-        message: error["error-message"][0]._,
-      }))
+      .map((error) => new RPCError(error, escapeHTML(reply.rawXML)))
       .filter(({ tag }) => !errorsToIgnore.includes(tag));
     if (errors.length) {
-      throw new NetconfError(errors);
+      throw new RPCErrors(errors);
     }
   }
 }

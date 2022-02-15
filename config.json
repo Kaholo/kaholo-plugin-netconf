@@ -3,7 +3,7 @@
   "type": "executer",
   "execProgram": "node",
   "main": "app.js",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Integration with NETCONF protocol",
   "imgUrl": "thumbnail.png",  
   "category": "NETWORK",
@@ -49,7 +49,7 @@
         {
           "name": "sourceDatastore",
           "viewName": "Source datastore",
-          "description": "Source datastore to get configuration from.",
+          "description": "Source datastore to get the configuration from.",
           "type": "options",
           "required": true,
           "options": [
@@ -138,6 +138,27 @@
             {
               "id": "none",
               "name": "None"
+            }
+          ]
+        },
+        {
+          "name": "targetDatastore",
+          "viewName": "Target datastore",
+          "description": "Target datastore to change the configuration in. Default is candidate.",
+          "type": "options",
+          "required": true,
+          "options": [
+            {
+              "id": "candidate",
+              "name": "Candidate"
+            },
+            {
+              "id": "running",
+              "name": "Running"
+            },
+            {
+              "id": "startup",
+              "name": "Startup"
             }
           ]
         },

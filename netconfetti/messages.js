@@ -4,6 +4,15 @@ const xml2js = require("xml2js");
 exports.ncNS = "urn:ietf:params:xml:ns:netconf:base:1.0";
 exports.yangNS = "urn:ietf:params:xml:ns:yang:1";
 exports.withDefaultsNS = "urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults";
+exports.changeNamespace = (namespaceName, n) => {
+  if (namespaceName === "netconf") {
+    exports.ncNS = n;
+  } else if (namespaceName === "yang") {
+    exports.yangNS = n;
+  } else if (namespaceName === "withDefaults") {
+    exports.withDefaultsNS = n;
+  }
+}
 const builderOptions = {
   renderOpts: {
     pretty: false,
