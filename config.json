@@ -1,0 +1,175 @@
+{
+  "name": "NETCONF",
+  "type": "executer",
+  "execProgram": "node",
+  "main": "app.js",
+  "version": "1.0.3",
+  "description": "Integration with NETCONF protocol",
+  "imgUrl": "thumbnail.png",  
+  "category": "NETWORK",
+  "methods": [
+    {
+      "name": "getConfig",
+      "viewName": "Get configuration",
+      "params": [
+        {
+          "name": "host",
+          "viewName": "Hostname",
+          "description": "Hostname of the network device.",
+          "type": "string",
+          "placeholder": "127.0.0.1",
+          "required": true
+        },
+        {
+          "name": "port",
+          "viewName": "Port",
+          "description": "Port number for the NETCONF protocol. Default is 830.",
+          "type": "string",
+          "placeholder": 830
+        },
+        {
+          "name": "username",
+          "viewName": "Username",
+          "description": "Username for SSH authentication.",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "password",
+          "viewName": "Password",
+          "description": "Password for SSH authentication. You can use a password or the SSH Key, if both are provided the SSH Key is prioritized.",
+          "type": "vault"
+        },
+        {
+          "name": "sshKey",
+          "viewName": "SSH Key",
+          "description": "SSH Key for SSH authentication. You can use the SSH Key or a password, if both are provided the SSH Key is prioritized.",
+          "type": "vault"
+        },
+        {
+          "name": "sourceDatastore",
+          "viewName": "Source datastore",
+          "description": "Source datastore to get the configuration from.",
+          "type": "options",
+          "required": true,
+          "options": [
+            {
+              "id": "candidate",
+              "name": "Candidate"
+            },
+            {
+              "id": "running",
+              "name": "Running"
+            },
+            {
+              "id": "startup",
+              "name": "Startup"
+            }
+          ]
+        },
+        {
+          "name": "filepath",
+          "viewName": "Output file",
+          "description": "Path to the output file to save the NETCONF reply.",
+          "type": "string",
+          "placeholder": "/path/to/file"
+        }
+      ]
+    },
+    {
+      "name": "editConfig",
+      "viewName": "Send configuration",
+      "params": [
+        {
+          "name": "host",
+          "viewName": "Hostname",
+          "description": "Hostname of the network device.",
+          "type": "string",
+          "placeholder": "127.0.0.1",
+          "required": true
+        },
+        {
+          "name": "port",
+          "viewName": "Port",
+          "description": "Port number for the NETCONF protocol. Default is 830.",
+          "type": "string",
+          "placeholder": 830
+        },
+        {
+          "name": "username",
+          "viewName": "Username",
+          "description": "Username for SSH authentication.",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "password",
+          "viewName": "Password",
+          "description": "Password for SSH authentication. You can use a password or the SSH Key, if both are provided the SSH Key is prioritized.",
+          "type": "vault"
+        },
+        {
+          "name": "sshKey",
+          "viewName": "SSH Key",
+          "description": "SSH Key for SSH authentication. You can use the SSH Key or a password, if both are provided the SSH Key is prioritized.",
+          "type": "vault"
+        },
+        {
+          "name": "xmlPath",
+          "viewName": "XML Config",
+          "description": "Path to the file containing XML configuration to be sent.",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "operation",
+          "viewName": "Operation",
+          "type": "options",
+          "required": true,
+          "options": [
+            {
+              "id": "merge",
+              "name": "Merge"
+            },
+            {
+              "id": "replace",
+              "name": "Replace"
+            },
+            {
+              "id": "none",
+              "name": "None"
+            }
+          ]
+        },
+        {
+          "name": "targetDatastore",
+          "viewName": "Target datastore",
+          "description": "Target datastore to change the configuration in. Default is candidate.",
+          "type": "options",
+          "required": true,
+          "options": [
+            {
+              "id": "candidate",
+              "name": "Candidate"
+            },
+            {
+              "id": "running",
+              "name": "Running"
+            },
+            {
+              "id": "startup",
+              "name": "Startup"
+            }
+          ]
+        },
+        {
+          "name": "outPath",
+          "viewName": "Output file",
+          "description": "Path to the output file to save the NETCONF reply.",
+          "type": "string",
+          "placeholder": "/path/to/file"
+        }  
+      ]
+    }
+  ]
+}
