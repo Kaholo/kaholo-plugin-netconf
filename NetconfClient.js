@@ -1,11 +1,14 @@
-const netconfetti = require("@128technology/netconfetti/");
-const messages = require("@128technology/netconfetti/dist/messages");
-const framing = require("@128technology/netconfetti/dist/deliminators");
+const netconfetti = require("@128technology/netconfetti");
 
 class NetconfClient extends netconfetti.Client {
   constructor() {
     super();
     this.sshFrames = [];
+    this.xmlBuffer = "";
+    this.framesDefinitions = {
+      beginFrame: /\n#(\d*)\n/,
+      endFrame: /(.|\n)+(?=\n##)/,
+    };
   }
 
   close() {
@@ -13,7 +16,7 @@ class NetconfClient extends netconfetti.Client {
   }
 
   getConfig(datastore) {
-    return this.rpc({
+    return this.rpcCall({
       "get-config": {
         source: {
           [datastore]: {},
@@ -26,7 +29,7 @@ class NetconfClient extends netconfetti.Client {
     if (!config.config) {
       throw new Error("Invalid XML format. The root tag must be \"config\".");
     }
-    return this.rpc({
+    return this.rpcCall({
       "edit-config": {
         target: {
           [datastore]: {},
@@ -38,13 +41,13 @@ class NetconfClient extends netconfetti.Client {
   }
 
   commit() {
-    return this.rpc({
+    return this.rpcCall({
       commit: {},
     });
   }
 
   lockDatastore(target) {
-    return this.rpc({
+    return this.rpcCall({
       lock: {
         target: {
           [target]: {},
@@ -54,7 +57,7 @@ class NetconfClient extends netconfetti.Client {
   }
 
   unlockDatastore(target) {
-    return this.rpc({
+    return this.rpcCall({
       unlock: {
         target: {
           [target]: {},
@@ -64,7 +67,7 @@ class NetconfClient extends netconfetti.Client {
   }
 
   deleteConfig(targetDatastore) {
-    return this.rpc({
+    return this.rpcCall({
       "delete-config": {
         target: {
           [targetDatastore]: {},
@@ -74,7 +77,7 @@ class NetconfClient extends netconfetti.Client {
   }
 
   validate(datastore) {
-    return this.rpc({
+    return this.rpcCall({
       validate: {
         source: {
           [datastore]: {},
@@ -83,55 +86,39 @@ class NetconfClient extends netconfetti.Client {
     });
   }
 
-  rpc(message) {
-    return new Promise((resolve, reject) => {
-      if (!this.activeChannel) {
-        throw new Error("Client not connected");
-      }
-      const messageId = this.idGenerator();
-      const msg = messages.rpc(messageId, typeof message === "string" ? { [message]: {} } : message);
-      let msgRecv;
-      const timeoutId = setTimeout(() => {
-        this.removeListener("reply", msgRecv);
-        clearTimeout(timeoutId);
-        reject(new Error("Timeout waiting for response"));
-      }, this.timeout);
-      msgRecv = (reply) => {
-        if (reply.sshFrames) {
-          return resolve({ rawXML: "", parsedObject: {}, sshFrames: reply.sshFrames });
-        }
-        const receivedMessageId = reply.parsedObject.$["message-id"];
-        if (receivedMessageId !== messageId) {
-          return false;
-        }
-        this.removeListener("reply", msgRecv);
-        clearTimeout(timeoutId);
-        return resolve(reply);
-      };
-      this.on("reply", msgRecv);
-      this.activeChannel.write(msg);
-    });
+  async rpcCall(msg) {
+    try {
+      const { reply: parsedObject, data: rawXML } = await this.rpc(msg);
+      return { parsedObject, rawXML };
+    } catch {
+      return { sshFrames: [...this.sshFrames] };
+    } finally {
+      this.sshFrames = [];
+    }
   }
 
   async processData(buffer) {
     const frame = buffer.toString();
     this.sshFrames.push(frame);
 
-    if (!framing.endFrame.test(frame)) {
-      this.receiveBuffer += frame.replace(framing.beginFrame, "");
+    if (!this.framesDefinitions.endFrame.test(frame)) {
+      this.xmlBuffer += frame.replace(this.framesDefinitions.beginFrame, "");
       return;
     }
-    this.receiveBuffer += frame.replace(framing.beginFrame, "").match(framing.endFrame)[0];
+    this.xmlBuffer += frame.replace(this.framesDefinitions.beginFrame, "").match(this.framesDefinitions.endFrame)[0];
 
     try {
-      const data = await this.parser.parseStringPromise(this.receiveBuffer);
-      this.emit("reply", { rawXML: this.receiveBuffer, parsedObject: data["rpc-reply"] });
-      this.receiveBuffer = "";
-      this.sshFrames = [];
-    } catch {
-      this.emit("reply", { sshFrames: this.sshFrames });
-      this.receiveBuffer = "";
-      this.sshFrames = [];
+      const data = await this.parser.parseStringPromise(this.xmlBuffer);
+      this.emit("reply", {
+        reply: data["rpc-reply"],
+        data: this.xmlBuffer,
+        messageId: data["rpc-reply"].$["message-id"],
+        errors: [],
+      });
+    } catch (e) {
+      this.emit("reply", { errors: [e] });
+    } finally {
+      this.xmlBuffer = "";
     }
   }
 }
