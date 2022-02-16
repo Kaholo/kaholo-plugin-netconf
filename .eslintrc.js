@@ -15,7 +15,4 @@ module.exports = {
     quotes: ["error", "double"],
     curly: ["error", "all"],
   },
-  ignorePatterns: [
-    "netconfetti/",
-  ],
 };
