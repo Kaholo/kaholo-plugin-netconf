@@ -1,7 +1,7 @@
 const escapeHTML = require("escape-html");
 const fs = require("fs/promises");
 const xml2js = require("xml2js");
-const { RPCError, RPCErrors } = require("./netconfetti");
+const { RPCError, RPCErrors } = require("@128technology/netconfetti");
 
 const DEFAULT_PORT = 830;
 
